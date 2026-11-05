@@ -1,63 +1,54 @@
 package com.example.chatapp.adapters;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
+import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.chatapp.R; // Ensure you have your R file imported
 import com.example.chatapp.databinding.ItemContainerReceivedMessageBinding;
 import com.example.chatapp.databinding.ItemContainerSentMessageBinding;
 import com.example.chatapp.models.ChatMessage;
-
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
     private final List<ChatMessage> chatMessages;
     private final String senderId;
     private final Bitmap receiverProfileImage;
+    private final OnImageClickListener imageClickListener; // NEW INTERFACE
 
     public static final int VIEW_TYPE_SENT = 1;
     public static final int VIEW_TYPE_RECEIVED = 2;
 
-    public ChatAdapter(List<ChatMessage> chatMessages, String senderId, Bitmap receiverProfileImage) {
+    public interface OnImageClickListener {
+        void onImageClick(Bitmap bitmap);
+    }
+
+    public ChatAdapter(List<ChatMessage> chatMessages, String senderId, Bitmap receiverProfileImage, OnImageClickListener imageClickListener) {
         this.chatMessages = chatMessages;
         this.senderId = senderId;
         this.receiverProfileImage = receiverProfileImage;
+        this.imageClickListener = imageClickListener; // Assign interface
     }
 
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         if (viewType == VIEW_TYPE_SENT) {
-            return new SentMessageViewHolder(
-                    ItemContainerSentMessageBinding.inflate(
-                            LayoutInflater.from(parent.getContext()),
-                            parent,
-                            false
-                    )
-            );
+            return new SentMessageViewHolder(ItemContainerSentMessageBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
         } else {
-            return new ReceivedMessageViewHolder(
-                    ItemContainerReceivedMessageBinding.inflate(
-                            LayoutInflater.from(parent.getContext()),
-                            parent,
-                            false
-                    )
-            );
+            return new ReceivedMessageViewHolder(ItemContainerReceivedMessageBinding.inflate(LayoutInflater.from(parent.getContext()), parent, false));
         }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (getItemViewType(position) == VIEW_TYPE_SENT) {
-            ((SentMessageViewHolder) holder).setData(chatMessages.get(position));
+            ((SentMessageViewHolder) holder).setData(chatMessages.get(position), imageClickListener);
         } else {
-            ((ReceivedMessageViewHolder) holder).setData(chatMessages.get(position), receiverProfileImage);
+            ((ReceivedMessageViewHolder) holder).setData(chatMessages.get(position), receiverProfileImage, imageClickListener);
         }
     }
 
@@ -75,55 +66,74 @@ public class ChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
-    // --- VIEW HOLDER: SENT MESSAGES ---
     static class SentMessageViewHolder extends RecyclerView.ViewHolder {
         private final ItemContainerSentMessageBinding binding;
 
-        SentMessageViewHolder(ItemContainerSentMessageBinding itemContainerSentMessageBinding) {
-            super(itemContainerSentMessageBinding.getRoot());
-            binding = itemContainerSentMessageBinding;
+        SentMessageViewHolder(ItemContainerSentMessageBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
 
-        void setData(ChatMessage chatMessage) {
-            binding.textMessage.setText(chatMessage.message);
+        void setData(ChatMessage chatMessage, OnImageClickListener listener) {
             binding.textDateTime.setText(chatMessage.dateTime);
-
-            // Handle Message Status (Ticks)
-            if (chatMessage.status == 3) {
-                // STATUS 3: READ (Blue Double Tick)
-                // Ensure you have a double tick icon in drawable
-                binding.imageTick.setImageResource(R.drawable.ic_double_check);
-                binding.imageTick.setColorFilter(Color.parseColor("#2196F3")); // Blue
-            }
-            else if (chatMessage.status == 2) {
-                // STATUS 2: DELIVERED (Grey Double Tick)
-                binding.imageTick.setImageResource(R.drawable.ic_double_check);
-                binding.imageTick.setColorFilter(Color.parseColor("#757575")); // Grey
-            }
-            else {
-                // STATUS 1: SENT (Single Grey Tick)
-                // Ensure you have a single tick icon in drawable
-                binding.imageTick.setImageResource(R.drawable.ic_check);
-                binding.imageTick.setColorFilter(Color.parseColor("#757575")); // Grey
+            if (chatMessage.type != null && chatMessage.type.equals("image")) {
+                try {
+                    byte[] bytes = Base64.decode(chatMessage.message, Base64.DEFAULT);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    if (bitmap != null) {
+                        binding.imageAttachment.setImageBitmap(bitmap);
+                        binding.imageAttachment.setVisibility(View.VISIBLE);
+                        binding.textMessage.setVisibility(View.GONE);
+                        // Click Listener logic!
+                        binding.imageAttachment.setOnClickListener(v -> listener.onImageClick(bitmap));
+                    }
+                } catch (Exception e) {
+                    binding.textMessage.setText("📷 Error loading image");
+                    binding.textMessage.setVisibility(View.VISIBLE);
+                    binding.imageAttachment.setVisibility(View.GONE);
+                }
+            } else {
+                binding.textMessage.setText(chatMessage.message);
+                binding.textMessage.setVisibility(View.VISIBLE);
+                binding.imageAttachment.setVisibility(View.GONE);
             }
         }
     }
 
-    // --- VIEW HOLDER: RECEIVED MESSAGES ---
     static class ReceivedMessageViewHolder extends RecyclerView.ViewHolder {
         private final ItemContainerReceivedMessageBinding binding;
 
-        ReceivedMessageViewHolder(ItemContainerReceivedMessageBinding itemContainerReceivedMessageBinding) {
-            super(itemContainerReceivedMessageBinding.getRoot());
-            binding = itemContainerReceivedMessageBinding;
+        ReceivedMessageViewHolder(ItemContainerReceivedMessageBinding binding) {
+            super(binding.getRoot());
+            this.binding = binding;
         }
 
-        void setData(ChatMessage chatMessage, Bitmap receiverProfileImage) {
-            binding.textMessage.setText(chatMessage.message);
+        void setData(ChatMessage chatMessage, Bitmap receiverProfileImage, OnImageClickListener listener) {
             binding.textDateTime.setText(chatMessage.dateTime);
-
             if (receiverProfileImage != null) {
                 binding.imageProfile.setImageBitmap(receiverProfileImage);
+            }
+
+            if (chatMessage.type != null && chatMessage.type.equals("image")) {
+                try {
+                    byte[] bytes = Base64.decode(chatMessage.message, Base64.DEFAULT);
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    if (bitmap != null) {
+                        binding.imageAttachment.setImageBitmap(bitmap);
+                        binding.imageAttachment.setVisibility(View.VISIBLE);
+                        binding.textMessage.setVisibility(View.GONE);
+                        // Click Listener logic!
+                        binding.imageAttachment.setOnClickListener(v -> listener.onImageClick(bitmap));
+                    }
+                } catch (Exception e) {
+                    binding.textMessage.setText("📷 Error loading image");
+                    binding.textMessage.setVisibility(View.VISIBLE);
+                    binding.imageAttachment.setVisibility(View.GONE);
+                }
+            } else {
+                binding.textMessage.setText(chatMessage.message);
+                binding.textMessage.setVisibility(View.VISIBLE);
+                binding.imageAttachment.setVisibility(View.GONE);
             }
         }
     }

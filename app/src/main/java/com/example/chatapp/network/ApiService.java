@@ -5,8 +5,7 @@ import com.example.chatapp.models.SignInRequest;
 import com.example.chatapp.models.SignInResponse;
 import com.example.chatapp.models.SignUpRequest;
 import com.example.chatapp.models.SignUpResponse;
-import com.example.chatapp.models.User; // Import User
-
+import com.example.chatapp.models.User;
 import com.example.chatapp.models.PreKeyBundle;
 
 import java.util.List;
@@ -17,27 +16,39 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface ApiService {
-
     @POST("signup")
     Call<SignUpResponse> signUp(@Body SignUpRequest signUpRequest);
 
     @POST("login")
     Call<SignInResponse> signIn(@Body SignInRequest signInRequest);
 
-    @GET("messages")
-    Call<List<ChatMessage>> getChatHistory(
-            @Query("sender") String sender,
-            @Query("receiver") String receiver
-    );
+    // 👇 NEW ROUTE
+    @POST("update_profile")
+    Call<UpdateProfileResponse> updateProfile(@Body UpdateProfileRequest request);
 
-    // 👇 ADD THIS MISSING METHOD 👇
+    @GET("messages")
+    Call<List<ChatMessage>> getChatHistory(@Query("sender") String sender, @Query("receiver") String receiver);
+
     @GET("users")
     Call<List<User>> getUsers(@Query("userId") String userId);
 
-    // Add to your existing ApiService.java
     @GET("keys")
     Call<PreKeyBundle> getPreKeyBundle(@Query("phone") String phone);
 
     @POST("keys/upload")
     Call<Void> uploadPreKeyBundle(@Body PreKeyBundle bundle);
+
+    // Quick classes for the new route
+    class UpdateProfileRequest {
+        public String userId;
+        public String image;
+        public UpdateProfileRequest(String userId, String image) {
+            this.userId = userId;
+            this.image = image;
+        }
+    }
+    class UpdateProfileResponse {
+        public Boolean status;
+        public String message;
+    }
 }

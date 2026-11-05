@@ -7,39 +7,53 @@
 
     <TextView
         android:id="@+id/textMessage"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@drawable/background_sent_message"
-        android:paddingStart="12dp"
-        android:paddingTop="8dp"
-        android:paddingEnd="12dp"
-        android:paddingBottom="8dp"
+        android:paddingStart="16dp"
+        android:paddingTop="12dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="12dp"
         android:text="Message"
         android:textColor="@color/white"
-        android:textSize="13sp"
+        android:textSize="14sp"
+        android:elevation="1dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintWidth_max="wrap" />
+        app:layout_constraintWidth_max="280dp" />
+
+    <com.makeramen.roundedimageview.RoundedImageView
+        android:id="@+id/imageAttachment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        android:elevation="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_max="250dp"
+        app:layout_constraintHeight_max="350dp"
+        app:riv_corner_radius="16dp"/>
 
     <TextView
         android:id="@+id/textDateTime"
-        android:layout_width="0dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:text="12:00 PM"
-        android:textColor="#C0C0C0"
-        android:textSize="10sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:textColor="@color/secondary_text"
+        android:textSize="11sp"
         app:layout_constraintEnd_toStartOf="@id/imageTick"
-        app:layout_constraintTop_toBottomOf="@id/textMessage" />
+        app:layout_constraintTop_toBottomOf="@+id/textMessage" />
 
     <ImageView
         android:id="@+id/imageTick"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
         android:layout_marginStart="4dp"
         android:src="@drawable/ic_check"
-        app:tint="#CCCCCC"
+        app:tint="@color/secondary_text"
         app:layout_constraintBottom_toBottomOf="@id/textDateTime"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/textDateTime"/>

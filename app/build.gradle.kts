@@ -4,16 +4,12 @@ plugins {
 
 android {
     namespace = "com.example.chatapp"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 36 // 👈 Updated from 34 to 36 to resolve dependency errors
 
     defaultConfig {
         applicationId = "com.example.chatapp"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -35,7 +31,7 @@ android {
     }
 
     buildFeatures{
-        viewBinding= true
+        viewBinding = true
     }
 }
 
@@ -59,13 +55,11 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 
-    // Socket.IO (Fixed for Kotlin DSL)
+    // Socket.IO
     implementation("io.socket:socket.io-client:2.1.0") {
-        // syntax: exclude(group = "...", module = "...")
         exclude(group = "org.json", module = "json")
     }
-// BouncyCastle for X25519, Ed25519, and HKDF
+
+    // BouncyCastle for X25519, Ed25519, and HKDF
     implementation("org.bouncycastle:bcprov-jdk18on:1.77")
 }
-
-

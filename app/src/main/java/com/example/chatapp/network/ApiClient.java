@@ -9,7 +9,7 @@ public class ApiClient {
     public static Retrofit getClient() {
         if (retrofit == null) {
             retrofit = new Retrofit.Builder()
-                    .baseUrl("http://10.0.2.2:8080/") // Changed for Emulator
+                    .baseUrl("http://10.0.2.2:8080") // Changed for Emulator
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }

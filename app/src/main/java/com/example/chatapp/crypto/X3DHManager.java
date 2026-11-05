@@ -26,7 +26,7 @@ public class X3DHManager {
         Log.d(TAG, "PQ-HYBRID X3DH PROTOCOL EXECUTION (INITIATOR)");
         Log.d(TAG, "Parameters loaded -> Curve: X25519, KEM: Kyber-768, Hash: SHA-256\n");
 
-        KeyFactory kf = KeyFactory.getInstance("X25519", "BC");
+        KeyFactory kf = KeyFactory.getInstance("X25519");
 
         PublicKey peerIdentityPub = kf.generatePublic(new X509EncodedKeySpec(Base64.decode(peerBundle.identityPublic, Base64.NO_WRAP)));
         PublicKey peerSignedPreKeyPub = kf.generatePublic(new X509EncodedKeySpec(Base64.decode(peerBundle.signedPreKeyPublic, Base64.NO_WRAP)));
@@ -72,7 +72,7 @@ public class X3DHManager {
         Log.d(TAG, "\n=======================================================");
         Log.d(TAG, "PHASE 3: RESPONDER RECEIVES HYBRID HANDSHAKE");
 
-        KeyFactory kf = KeyFactory.getInstance("X25519", "BC");
+        KeyFactory kf = KeyFactory.getInstance("X25519");
 
         PublicKey peerIdentityPub = kf.generatePublic(new X509EncodedKeySpec(Base64.decode(peerIdentityBase64, Base64.NO_WRAP)));
         PublicKey peerEphemeralPub = kf.generatePublic(new X509EncodedKeySpec(Base64.decode(peerEphemeralBase64, Base64.NO_WRAP)));

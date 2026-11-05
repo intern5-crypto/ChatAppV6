@@ -5,7 +5,6 @@ import org.bouncycastle.crypto.SecretWithEncapsulation;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.HKDFBytesGenerator;
 import org.bouncycastle.crypto.params.HKDFParameters;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 // Kyber imports
 import org.bouncycastle.pqc.crypto.crystals.kyber.KyberParameters;
@@ -21,7 +20,6 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
-import java.security.Security;
 import javax.crypto.Cipher;
 import javax.crypto.KeyAgreement;
 import javax.crypto.Mac;
@@ -30,24 +28,20 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class CryptoEngine {
 
-    static {
-        // Register BouncyCastle
-        Security.removeProvider("BC");
-        Security.addProvider(new BouncyCastleProvider());
-    }
+    // 🚨 DELETED THE STATIC BLOCK THAT WAS BREAKING ANDROID'S TLS 🚨
 
     public static final int NONCE_LEN = 12;
     public static final int KEY_LEN = 32;
 
     // Generate X25519 KeyPair
     public static KeyPair generateX25519KeyPair() throws Exception {
-        KeyPairGenerator kpg = KeyPairGenerator.getInstance("X25519", "BC");
+        KeyPairGenerator kpg = KeyPairGenerator.getInstance("X25519");
         return kpg.generateKeyPair();
     }
 
     // ECDH (Diffie-Hellman)
     public static byte[] dh(PrivateKey privateKey, PublicKey publicKey) throws Exception {
-        KeyAgreement ka = KeyAgreement.getInstance("X25519", "BC");
+        KeyAgreement ka = KeyAgreement.getInstance("X25519");
         ka.init(privateKey);
         ka.doPhase(publicKey, true);
         return ka.generateSecret();
@@ -64,14 +58,14 @@ public class CryptoEngine {
 
     // HMAC-SHA256 (for Symmetric Ratchet)
     public static byte[] hmacSha256(byte[] key, byte[] data) throws Exception {
-        Mac mac = Mac.getInstance("HmacSHA256", "BC");
+        Mac mac = Mac.getInstance("HmacSHA256");
         mac.init(new SecretKeySpec(key, "HmacSHA256"));
         return mac.doFinal(data);
     }
 
     // AES-GCM Encryption
     public static byte[] aesGcmEncrypt(byte[] key, byte[] nonce, byte[] plaintext, byte[] associatedData) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC");
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         GCMParameterSpec spec = new GCMParameterSpec(128, nonce);
         cipher.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), spec);
         if (associatedData != null) {
@@ -82,7 +76,7 @@ public class CryptoEngine {
 
     // AES-GCM Decryption
     public static byte[] aesGcmDecrypt(byte[] key, byte[] nonce, byte[] ciphertext, byte[] associatedData) throws Exception {
-        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding", "BC");
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
         GCMParameterSpec spec = new GCMParameterSpec(128, nonce);
         cipher.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), spec);
         if (associatedData != null) {

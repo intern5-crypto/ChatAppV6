@@ -121,7 +121,7 @@ public class DoubleRatchet {
             if (obj.has("CKs")) dr.CKs = Base64.decode(obj.getString("CKs"), Base64.NO_WRAP);
             if (obj.has("CKr")) dr.CKr = Base64.decode(obj.getString("CKr"), Base64.NO_WRAP);
 
-            KeyFactory kf = KeyFactory.getInstance("X25519", "BC");
+            KeyFactory kf = KeyFactory.getInstance("X25519");
             if (obj.has("DHs_pub") && obj.has("DHs_priv")) {
                 dr.DHs = new KeyPair(
                         kf.generatePublic(new X509EncodedKeySpec(Base64.decode(obj.getString("DHs_pub"), Base64.NO_WRAP))),
